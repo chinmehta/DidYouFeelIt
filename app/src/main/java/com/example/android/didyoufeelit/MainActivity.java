@@ -59,20 +59,40 @@ public class MainActivity extends AppCompatActivity {
         magnitudeTextView.setText(earthquake.perceivedStrength);
     }
 
+    /**
+     * {@link AsyncTask} to perform the network request on a background thread, and then
+     * update the UI with the first earthquake in the response.
+     */
     private class EarthquakeAsyncTask extends AsyncTask<String, Void, Event>
     {
 
+        /**
+         * This method is invoked (or called) on a background thread, so we can perform
+         * long-running operations like making a network request.
+         *
+         * It is NOT okay to update the UI from a background thread, so we just return an
+         * {@link Event} object as the result.
+         */
         @Override
-        protected Event doInBackground(String... params) {
+        protected Event doInBackground(String... urls) {
+            // Don't perform the request if there are no URLs, or the first URL is null.
+            if (urls.length < 1 || urls[0] == null) {
+                return null;
+            }
 
 
             // Perform the HTTP request for earthquake data and process the response.
-            Event result = Utils.fetchEarthquakeData(USGS_REQUEST_URL);
+            Event result = Utils.fetchEarthquakeData(urls[0]);
             return result;
         }
 
         @Override
         protected void onPostExecute(Event result) {
+
+            // If there is no result, do nothing.
+            if (result == null) {
+                return;
+            }
             // Update the information displayed to the user.
             updateUi(result);
         }
